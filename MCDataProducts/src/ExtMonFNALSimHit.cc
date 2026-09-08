@@ -8,6 +8,7 @@ namespace mu2e {
 
   std::ostream& operator<<(std::ostream& os, const ExtMonFNALSimHit& hit) {
     return os<<"ExtMonFNALSimHit(sid="<<hit.moduleId()
+	     <<", PID="<<hit.simParticle()->pdgId()
              <<", particle="<<hit.simParticle()->id()
              <<", eTot="<<hit.totalEnergyDeposit()
              <<", eIon="<<hit.ionizingEnergyDeposit()

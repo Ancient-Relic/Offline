@@ -32,7 +32,8 @@ physics.analyzers.emfPatArbAnalysis.singleParticleClusterModuleLabel : pixelReco
 
 
 physics.producers.EMFPatRecFromTracklets.clusterClockTolerance: 1
-
+services.GeometryService.bFieldFile : "Offline/Mu2eG4/geom/bfgeom_no_ds_v01.txt"
+services.GeometryService.simulatedDetector.tool_type : "Mu2e"
 
 // This tells emacs to view this file in the JavaScript mode.
 // Local Variables:

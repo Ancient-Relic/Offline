@@ -65,7 +65,7 @@ double extMonFNAL.filter.magnet.apertureWidth  = 51.6; // mm
 double extMonFNAL.filter.magnet.apertureHeight = 99.9; // mm
 string extMonFNAL.filter.magnet.material  = "G4_Fe";
 double extMonFNAL.filter.magnet.magneticLength = 3556.0; //mm
-double extMonFNAL.filter.magnet.BdL = 822.; // T*mm
+double extMonFNAL.filter.magnet.BdL = 822.; // T*mm //*was 822.
 
 bool extMonFNAL.filter.magnet.iron.visible = true;
 bool extMonFNAL.filter.magnet.iron.solid = false;
@@ -127,7 +127,7 @@ double extMonFNAL.spectrometer.magnet.apertureWidth  =  52.; // mm
 double extMonFNAL.spectrometer.magnet.apertureHeight = 228.6; // mm
 string extMonFNAL.spectrometer.magnet.material  = "G4_Fe";
 double extMonFNAL.spectrometer.magnet.magneticLength = 508.0; //mm
-double extMonFNAL.spectrometer.magnet.BdL = 140.; // T*mm
+double extMonFNAL.spectrometer.magnet.BdL = 140.; // T*mm //
 
 bool extMonFNAL.spectrometer.magnet.iron.visible = true;
 bool extMonFNAL.spectrometer.magnet.iron.solid = false;
@@ -169,10 +169,16 @@ double         extMonFNAL.scintInnerOffset = -33; // Distance from pixel plane c
 double         extMonFNAL.scintGap = 5.3; // Distance between the surfaces of the two adjacent scintillators
 
 //================================================================
+// Fast Feedback Scintillator parameters (Docdb#36587)
+vector<double> extMonFNAL.FFbScintFullSize  = { 379.0, 387.0, 12.7 }; // mm
+string         extMonFNAL.FFbScintMaterial  = "Scintillator";
+double         extMonFNAL.FFbScintOffset    = 20.0;  // mm, distance from ScintillatorDn5 center to center
+
+//================================================================
 // The Ext Mon detector mother
 
-vector<double> extMonFNAL.detectorMotherHS = { 150, 200, 750 };
-double extMonFNAL.detectorMotherDistToMagnet = 1;
+vector<double> extMonFNAL.detectorMotherHS = { 200, 270, 770 };  // was { 150, 200, 750 }
+double extMonFNAL.detectorMotherDistToMagnet = 71; //was 1
 bool extMonFNAL.stackRotation = true;
 
 //================================================================
@@ -228,7 +234,7 @@ vector<double> extMonFNAL.dn.plane_yoffset = { 0., 0., 0., 0. };
 vector<double> extMonFNAL.dn.module_xoffset = { 0., 0., 0. };
 vector<double> extMonFNAL.dn.module_yoffset = { 16.7, 0., -16.7 };
 vector<double> extMonFNAL.dn.module_zoffset = { 1., -1., 1. }; // just determines which side of the plane; all math is handed in constructExMonFNALDetector
-vector<double> extMonFNAL.dn.module_rotation = { 0., 0., 180. };
+vector<double> extMonFNAL.dn.module_rotation = { 0., 0., 180. }; //*was 180.
 
 //================================================================
 // The pixel chillers parameters'
@@ -340,7 +346,7 @@ bool   extMonFNAL.filter.vd.enabled = true;
 bool   extMonFNAL.detector.vd.enabled = true;
 double extMonFNAL.detector.vd.halfdx = 100; // transverse size
 double extMonFNAL.detector.vd.halfdy = 100; // transverse size
-double extMonFNAL.detector.vd.Gapz = 10;
+double extMonFNAL.detector.vd.Gapz = 26.5; // was 10., adjusted to avoid aluminum frame
 
 // A set of 6 planar VDs that enclose ExtMonFNAL.
 // The "box" is rotated to be parallel to the ExtMon system axes.

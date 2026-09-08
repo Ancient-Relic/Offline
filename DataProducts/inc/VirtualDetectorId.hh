@@ -88,6 +88,8 @@ namespace mu2e {
       STM_Final, // 114
       STM_UpStrHole, //115
       STM_UpStrLarge, //116
+      EMFDetectorUp_Scint, //117
+      EMFC2Exit_Large, //118
       lastEnum
     };
 
@@ -139,7 +141,9 @@ namespace mu2e {
       "PTM_1_In", "PTM_2_In", \
       "STM_Final", \
       "STM_UpStrHole", \
-      "STM_UpStrLarge"
+      "STM_UpStrLarge", \
+      "EMFDetectorUp_Scint", \
+      "EMFC2Exit_Large"
   public:
 
     // The most important c'tor and accessor methods are first.

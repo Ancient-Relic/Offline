@@ -152,6 +152,86 @@ namespace mu2e {
                                   placePV,
                                   doSurfaceCheck
                                   );
+     //----------------------------------------------------------------
+     // Aluminum Frames
+        double frameMargin = 12.7;  //mm
+	double frameSpacing = 0.005;
+        double frameHalfThicknessZ = 25.4;
+        double px = plane.halfSize()[0];
+        double py = plane.halfSize()[1];
+
+        double fx = px + frameMargin;
+        double fy = py + frameMargin;
+        double wx = px + frameSpacing;
+        double wy = py + frameSpacing;
+
+        double sideHalfX = 0.5 * (fx - wx);
+        double sideHalfY = fy;
+        double topHalfX  = wx;
+        double topHalfY  = 0.5 * (fy - wy);
+
+        auto aluminum = findMaterialOrThrow("G4_Al");
+
+        // left bar
+//        nestBox("EMFFrameLeft" + volNameSuffix + std::to_string(iplane),
+//                std::vector<double>{sideHalfX, sideHalfY, frameHalfThicknessZ},
+//                aluminum,
+//                planeRot,
+//                stackOffset + (*stackRotationInMother) * CLHEP::Hep3Vector(-(wx + sideHalfX), 0, 0),
+//                mother,
+//                10000 + 10*iplane + 0,
+//                true,
+//                G4Colour::Grey(),
+//                true,
+ //               forceAuxEdgeVisible,
+ //               placePV,
+ //               doSurfaceCheck);
+        // right bar
+        nestBox("EMFFrameRight" + volNameSuffix + std::to_string(iplane),
+                std::vector<double>{sideHalfX, sideHalfY, frameHalfThicknessZ},
+                aluminum,
+                planeRot,
+                stackOffset + (*stackRotationInMother) * CLHEP::Hep3Vector(+(wx + sideHalfX), 0, 0),
+                mother,
+                10000 + 10*iplane + 1,
+                true,
+                G4Colour::Grey(),
+                true,
+                forceAuxEdgeVisible,
+                placePV,
+                doSurfaceCheck);
+
+        // top bar
+        nestBox("EMFFrameTop" + volNameSuffix + std::to_string(iplane),
+                std::vector<double>{topHalfX, topHalfY, frameHalfThicknessZ},
+                aluminum,
+                planeRot,
+                stackOffset + (*stackRotationInMother) * CLHEP::Hep3Vector(0, +(wy + topHalfY), 0),
+                mother,
+                10000 + 10*iplane + 2,
+                true,
+                G4Colour::Grey(),
+                true,
+                forceAuxEdgeVisible,
+                placePV,
+                doSurfaceCheck);
+
+        // bottom bar
+        nestBox("EMFFrameBottom" + volNameSuffix + std::to_string(iplane),
+                std::vector<double>{topHalfX, topHalfY, frameHalfThicknessZ},
+                aluminum,
+                planeRot,
+                stackOffset + (*stackRotationInMother) * CLHEP::Hep3Vector(0, -(wy + topHalfY), 0),
+                mother,
+                10000 + 10*iplane + 3,
+                true,
+                G4Colour::Grey(),
+                true,
+                forceAuxEdgeVisible,
+                placePV,
+                doSurfaceCheck);
+
+
 
       //----------------------------------------------------------------
       // Cooling Tubes
@@ -361,6 +441,54 @@ namespace mu2e {
           }
         }
       } // for(vdId-1)
+	// One Virtual Detector in front of the Scintillator
+	if (entranceVD == VirtualDetectorId::EMFDetectorUpEntrance &&
+	    vdg->exist(VirtualDetectorId::EMFDetectorUp_Scint)){
+        if (verbosityLevel > 0) {
+          std::cout << __func__ << " constructing "
+                    << VirtualDetector::volumeName(VirtualDetectorId::EMFDetectorUp_Scint)
+                    << std::endl;
+        }
+
+        std::vector<double> hlen(3);
+        hlen[0] = config.getDouble("extMonFNAL.detector.vd.halfdx");
+        hlen[1] = config.getDouble("extMonFNAL.detector.vd.halfdy");
+        hlen[2] = vdg->getHalfLength();
+
+        const double PlaneToVDGap   = config.getDouble("extMonFNAL.detector.vd.Gapz");
+        const double ScintExtraGap  = 30.0;
+
+        CLHEP::Hep3Vector centerInRoom = stackRefPointInMother + *planeRot
+          * CLHEP::Hep3Vector(0,
+                              0,
+                              stack.plane_zoffset().back()
+                              + 2*(module.sensorHalfSize()[2] + module.chipHalfSize()[2])
+                              + vdg->getHalfLength()
+                              + PlaneToVDGap
+                              + ScintExtraGap
+                              );
+
+        VolumeInfo vdInfo = nestBox(VirtualDetector::volumeName(VirtualDetectorId::EMFDetectorUp_Scint),
+                                    hlen,
+                                    vacuumMaterial,
+                                    planeRot,
+                                    centerInRoom,
+                                    mother,
+                                    VirtualDetectorId::EMFDetectorUp_Scint,
+                                    vdIsVisible,
+                                    G4Color::Cyan(),
+                                    vdIsSolid,
+                                    forceAuxEdgeVisible,
+                                    placePV,
+                                    doSurfaceCheck
+                                    );
+
+        if (doSurfaceCheck) {
+          checkForOverlaps(vdInfo.physical, config, verbosityLevel > 0);
+        }
+      }
+
+
     } // detector VD block
 
   }
@@ -615,6 +743,67 @@ namespace mu2e {
     }
   }// constructExtMonFNALScintillators
 
+  void constructExtMonFNALFFbScintillator(const VolumeInfo& mother,
+                                           const ExtMonFNALPlaneStack& dnStack,
+                                           const SimpleConfig& config,
+                                           bool const forceAuxEdgeVisible,
+                                           bool const doSurfaceCheck,
+                                           bool const placePV)
+  {
+    GeomHandle<ExtMonFNAL::ExtMon> extmon;
+    AntiLeakRegistry& reg = art::ServiceHandle<Mu2eG4Helper>()->antiLeakRegistry();
+
+    // --- Coordinate
+    CLHEP::HepRotation *stackRotInMotherInv = reg.add(dnStack.rotationInMu2e().inverse() * extmon->detectorMotherRotationInMu2e());
+    CLHEP::HepRotation *stackRotInMother = reg.add(stackRotInMotherInv->inverse());
+
+    CLHEP::Hep3Vector stackRefPointInMother(extmon->detectorMotherRotationInMu2e().inverse() * (dnStack.refPointInMu2e() - mother.centerInMu2e()));
+
+    // --- Center Position from ScintDn5 ---
+    std::vector<double> ffbHS;
+    config.getVectorDouble("extMonFNAL.FFbScintFullSize", ffbHS);
+    for (auto& a : ffbHS) { a /= 2.0; }
+    double ffbOffset = config.getDouble("extMonFNAL.FFbScintOffset");
+
+    std::vector<double> dnScintFS;
+    config.getVectorDouble("extMonFNAL.Dn.scintFullSize", dnScintFS);
+    double dnScintHalfZ = dnScintFS[2] / 2.0;  // = 1.5 mm
+
+    double scintPlaneOffset = config.getDouble("extMonFNAL.scintPlaneOffset");  // 29.0 mm
+    double scintGap         = config.getDouble("extMonFNAL.scintGap");          // 5.3 mm
+    double scintDn5Offset = scintPlaneOffset + scintGap + 2.0 * dnScintHalfZ;
+    double ffbTotalOffset = scintDn5Offset + ffbOffset;
+
+    CLHEP::Hep3Vector planeOffset(dnStack.plane_xoffset()[0], dnStack.plane_yoffset()[0], dnStack.plane_zoffset()[0]);
+
+    CLHEP::Hep3Vector stackOffset = stackRefPointInMother + *stackRotInMother * planeOffset;
+    CLHEP::Hep3Vector ffbCenter = stackOffset + CLHEP::Hep3Vector(0, 0, -ffbTotalOffset);
+
+    // --- Visibility settings ---
+    const auto geomOptions = art::ServiceHandle<GeometryService>()->geomOptions();
+    geomOptions->loadEntry(config, "extMonFNALSensorPlane", "extMonFNAL.sensorPlane");
+    bool const isVisible = geomOptions->isVisible("extMonFNALSensorPlane");
+    bool const isSolid   = geomOptions->isSolid("extMonFNALSensorPlane");
+
+    // --- Rotation ---
+    bool stackRotation = config.getBool("extMonFNAL.stackRotation");
+    CLHEP::HepRotation *pRot = stackRotation ? stackRotInMother : reg.add(CLHEP::HepRotation::IDENTITY);
+
+    nestBox("FFbScintillator",
+            ffbHS,
+            findMaterialOrThrow(config.getString("extMonFNAL.FFbScintMaterial")),
+            pRot,
+            ffbCenter,
+            mother,
+            0,
+            isVisible,
+            G4Colour::Blue(),
+            isSolid,
+            forceAuxEdgeVisible,
+            placePV,
+            doSurfaceCheck);
+
+  }  // constructExtMonFNALFFbScintillator
 
 
   //================================================================
@@ -779,6 +968,15 @@ namespace mu2e {
 
     detectorMother.centerInWorld = extmon->detectorMotherCenterInMu2e() + (GeomHandle<WorldG4>())->mu2eOriginInWorld();
 
+std::cout << "=== Mother Volume Debug ===" << std::endl;
+std::cout << "Mother center in Mu2e: ("
+          << extmon->detectorMotherCenterInMu2e().x() << ", "
+          << extmon->detectorMotherCenterInMu2e().y() << ", "
+          << extmon->detectorMotherCenterInMu2e().z() << ")" << std::endl;
+std::cout << "Mother HS: ("
+          << extmon->detectorMotherHS()[0] << ", "
+          << extmon->detectorMotherHS()[1] << ", "
+          << extmon->detectorMotherHS()[2] << ")" << std::endl;
 
     constructExtMonFNALPlaneStack(extmon->module(),
                                   extmon->dn(),
@@ -787,6 +985,12 @@ namespace mu2e {
                                   detectorMother,
                                   *motherRotInv,
                                   config);
+    constructExtMonFNALFFbScintillator(detectorMother,
+                                  extmon->dn(),
+                                  config,
+                                  forceAuxEdgeVisible,
+                                  doSurfaceCheck,
+                                  placePV);
 
     constructExtMonFNALPlaneStack(extmon->module(),
                                   extmon->up(),

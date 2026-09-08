@@ -63,6 +63,15 @@ physics : {
                 TimeVD: { times: [] }
             }
 
+	    inputs: {
+               primaryType: GenParticles
+               primaryTag:  generate
+            }
+	    Scoring: {
+	       enabled: false
+	         meshNames: []
+		 scorerNames: []
+	    }
             Mu2eG4StackingOnlyCut: @local::mu2eg4CutNeutrinos
             Mu2eG4SteppingOnlyCut: {}
             Mu2eG4CommonCut: {}
@@ -81,18 +90,31 @@ physics : {
             inputModuleLabel  : "g4run"
             inputInstanceName : ""
         }
+
+	emfdrawsim: {
+            module_type: EMFDetDrawSim
+            inputModuleLabel  : "g4run"
+            inputInstanceName : ""
+            
+            TFileService: {
+            fileName: "SimHits.root"
+            service_type: "TFileService"
+            }
+        }
+
         emfSimHits: {
             module_type: EMFDetHistSimHits
             inputModuleLabel  : "g4run"
             geomModuleLabel  : ""
         }
+
     }
 
     tprint : [ generate, g4run ]
     //    gm  : [ geom ]
 
     // eprint: [ vdprint, emfprintsim, emfSimHits ]
-    eprint: [ emfSimHits, emfprintsim ]
+    eprint: [ emfSimHits, emfdrawsim, emfprintsim ]
     out : [ FullOutput ]
 
     trigger_paths: [ tprint ]

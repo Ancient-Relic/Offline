@@ -241,8 +241,8 @@ namespace mu2e {
         return VDHit(Mu2eCoordinates(), hit);
       case VirtualDetectorId::EMFC1Entrance: case VirtualDetectorId::EMFC1Exit:
         return VDHit(*pdump_, hit);
-      case VirtualDetectorId::EMFC2Entrance: case VirtualDetectorId::EMFC2Exit:
-      case VirtualDetectorId::EMFDetectorUpEntrance: case VirtualDetectorId::EMFDetectorUpExit:
+      case VirtualDetectorId::EMFC2Entrance: case VirtualDetectorId::EMFC2Exit: case VirtualDetectorId::EMFC2Exit_Large:
+      case VirtualDetectorId::EMFDetectorUpEntrance: case VirtualDetectorId::EMFDetectorUpExit: case VirtualDetectorId::EMFDetectorUp_Scint:
         return VDHit(pdet_->up(), hit);
       case VirtualDetectorId::EMFDetectorDnEntrance: case VirtualDetectorId::EMFDetectorDnExit:
         return VDHit(pdet_->dn(), hit);

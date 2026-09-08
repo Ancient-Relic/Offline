@@ -302,6 +302,7 @@ namespace mu2e {
         vd->addVirtualDetector(VirtualDetectorId::EMFC1Exit, vzero, 0, vzero);
         vd->addVirtualDetector(VirtualDetectorId::EMFC2Entrance, vzero, 0, vzero);
         vd->addVirtualDetector(VirtualDetectorId::EMFC2Exit, vzero, 0, vzero);
+	vd->addVirtualDetector(VirtualDetectorId::EMFC2Exit_Large, vzero, 0, vzero);
       }
 
       // This VD is related to PS
@@ -354,6 +355,7 @@ namespace mu2e {
         throw cet::exception("BADCONFIG")<<"Error: geometry parameter extMonFNAL.vd.enabled is obsolete and should not be used.\n";
       }
       if(geom->hasElement<ExtMonFNAL::ExtMon>() && c.getBool("extMonFNAL.detector.vd.enabled", false)) {
+	vd->addVirtualDetector(VirtualDetectorId::EMFDetectorUp_Scint, CLHEP::Hep3Vector(), 0, CLHEP::Hep3Vector());
         vd->addVirtualDetector(VirtualDetectorId::EMFDetectorUpEntrance, CLHEP::Hep3Vector(), 0, CLHEP::Hep3Vector());
         vd->addVirtualDetector(VirtualDetectorId::EMFDetectorUpExit, CLHEP::Hep3Vector(), 0, CLHEP::Hep3Vector());
         vd->addVirtualDetector(VirtualDetectorId::EMFDetectorDnEntrance, CLHEP::Hep3Vector(), 0, CLHEP::Hep3Vector());

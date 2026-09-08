@@ -100,6 +100,12 @@ namespace {
     throw cet::exception("BADCONFIG")<<"ExtMonFNAL getExitVD(): unknown collimator name "<<col.name();
   }
 
+  VirtualDetectorId::enum_type getExitVD_Large(const ExtMonFNALCollimator& col) {
+    if(col.name() == "collimator2") return VirtualDetectorId::EMFC2Exit_Large;
+    throw cet::exception("BADCONFIG")<<"ExtMonFNAL getExitVD_large(): unknown collimator name "<<col.name();
+  }
+
+
   //================================================================
   void placeWallScanPoints(const std::string& scanName,
                            const std::vector<CLHEP::Hep3Vector>& points,
@@ -467,7 +473,7 @@ namespace mu2e {
     if( vdg->exist(vd_exit) ) {
 
       TubsParams vdpars(0., collimator.channelRadius()[1], vdg->getHalfLength());
-
+	//TubsParams vdpars(0., 2*collimator.channelRadius()[1], vdg->getHalfLength());
       nestTubs(VirtualDetector::volumeName(vd_exit),
                vdpars,
                airMaterial,
@@ -483,7 +489,53 @@ namespace mu2e {
                doSurfaceCheck
                );
     }
+	//Enlarged Virtual Detector at Downstream Collimator Exit
+ if (collimator.name() == "collimator2") {
+      VirtualDetectorId::enum_type vd_exit_wide = getExitVD_Large(collimator);
+      if( vdg->exist(vd_exit_wide) ) {
+        double wideRadius = 2.0 * 75.0;
+        TubsParams vdparsWide(0., wideRadius, vdg->getHalfLength()/2);
 
+        Mu2eG4Helper* _helper = &(*(art::ServiceHandle<Mu2eG4Helper>()));
+        const VolumeInfo& detectorRoom = _helper->locateVolInfo("ExtMonDetectorRoom");
+        GeomHandle<ExtMonFNALBuilding> emfb;
+
+        // Position: same Mu2e-frame center as EMFC2Exit.
+        // EMFC2Exit is at (0,0, zPlanes.begin() + halfLength/2) in channel-local coords.
+        // channel is at (0,0,0) in collimatorMother.
+        // collimatorMother is at collimatorCenterInParent in HallAir.
+        CLHEP::Hep3Vector localOffset(0, 0, *zPlanes.begin() + vdg->getHalfLength()/2 - 0.5);
+        CLHEP::Hep3Vector vdCenterInMu2e =
+          parent.centerInMu2e() + collimatorCenterInParent
+          + collimatorRotationInParent * localOffset;
+        CLHEP::Hep3Vector vdCenterInRoom =
+          emfb->detectorRoomRotationInMu2e().inverse() * (vdCenterInMu2e - detectorRoom.centerInMu2e());
+
+        // Orientation:
+        //   rotInParentInv = R_object_in_Mu2e.inverse() * R_parent_in_Mu2e
+        // Here R_object = collimatorRotationInParent (collimator rotation in Mu2e/HallAir)
+        //      R_parent = detectorRoomRotationInMu2e
+        CLHEP::HepRotation* rotInRoomInv = reg.add(
+          collimatorRotationInParent.inverse() * emfb->detectorRoomRotationInMu2e());
+
+        nestTubs(VirtualDetector::volumeName(vd_exit_wide),
+                 vdparsWide,
+                 airMaterial,
+                 rotInRoomInv,
+                 vdCenterInRoom,
+                 detectorRoom,
+                 vd_exit_wide,
+                 geomOptions->isVisible(VirtualDetector::volumeName(vd_exit_wide)),
+                 G4Colour::Cyan(),
+                 geomOptions->isSolid(VirtualDetector::volumeName(vd_exit_wide)),
+                 forceAuxEdgeVisible,
+                 placePV,
+                 doSurfaceCheck
+                 );
+
+
+   }
+ }
     //--------------------------------------------------------------------
   }
 

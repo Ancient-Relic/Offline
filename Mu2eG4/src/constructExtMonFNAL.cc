@@ -129,16 +129,14 @@ namespace mu2e {
                            const CLHEP::HepRotation& mainParentRotationInMu2e,
                            const SimpleConfig& config)
   {
+    VolumeInfo detectorRoom = constructExtMonFNALDetectorRoom(mainParent,
+                                                              mainParentRotationInMu2e,
+                                                              config);
     constructExtMonFNALBuilding(collimator1Parent,
                                 collimator1ParentRotationInMu2e,
                                 mainParent,
                                 mainParentRotationInMu2e,
                                 config);
-
-    VolumeInfo detectorRoom = constructExtMonFNALDetectorRoom(mainParent,
-                                                              mainParentRotationInMu2e,
-                                                              config);
-
     GeomHandle<ExtMonFNAL::ExtMon> extmon;
     GeomHandle<ExtMonFNALBuilding> emfb;
 
