@@ -41,7 +41,12 @@ namespace mu2e {
       fhicl::Sequence<int> vdIds{
         Name("vdIds"),
         Comment("List of VirtualDetector IDs to extract"),
-        std::vector<int>{35, 36, 38, 39, 117, 118}
+        std::vector<int>{VirtualDetectorId::EMFDetectorUpEntrance,
+                         VirtualDetectorId::EMFDetectorUpExit,
+                         VirtualDetectorId::EMFDetectorDnEntrance,
+                         VirtualDetectorId::EMFDetectorDnExit,
+                         VirtualDetectorId::EMFDetectorUp_Scint,
+                         VirtualDetectorId::EMFC2Exit_Large}
       };
 
       fhicl::Sequence<std::string> scintVolumes{
@@ -370,17 +375,9 @@ namespace mu2e {
     std::cout << "  VD ID      Hits  Name" << std::endl;
     std::cout << "  ---------------------------------" << std::endl;
 
-    std::map<int, std::string> vdNames = {
-      {35,  "EMFDetectorUpEntrance"},
-      {36,  "EMFDetectorUpExit"},
-      {38,  "EMFDetectorDnEntrance"},
-      {39,  "EMFDetectorDnExit"},
-      {117, "EMFDetectorUp_Scint"},
-      {118, "EMFC2Exit_Large"},
-    };
-
     for (const auto& [vid, count] : hitCounts_) {
-      std::string name = vdNames.count(vid) ? vdNames[vid] : "???";
+      auto id = VirtualDetectorId::enum_type(vid);
+      std::string name = VirtualDetectorId::isValid(id) ? VirtualDetectorId::name(id) : "???";
       std::cout << "  " << std::setw(5) << vid
                 << std::setw(10) << count
                 << "  " << name << std::endl;
